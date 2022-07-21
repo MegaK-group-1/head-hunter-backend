@@ -4,7 +4,7 @@ import {UserController} from './user.controller';
 // import {Users} from "./index";
 import {Users} from "./user.entity";
 import {UserService} from './user.service';
-import {HRAgent} from "./HRAgent";
+import {HRAgent} from "./hrAgent.entity";
 
 @Module({
     imports: [TypeOrmModule.forFeature([Users, HRAgent])],

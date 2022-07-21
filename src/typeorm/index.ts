@@ -1,5 +1,5 @@
 import {Users} from "./user.entity";
-import {HRAgent} from "./HRAgent";
+import {HRAgent} from "./hrAgent.entity";
 
 const entities = [Users, HRAgent];
 
