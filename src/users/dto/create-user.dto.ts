@@ -1,4 +1,17 @@
 import { IsString, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { userRole } from '../../types/user';
+
+export class CreateUserAdminDto {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  fullName: string;
+  role: userRole;
+}
 
 export class CreateUserDto {
   @IsEmail()
@@ -69,4 +82,23 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   courses: string;
+}
+
+export class CreateUserHrDto {
+  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  fullName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  company: string;
+
+  @IsString()
+  @IsNotEmpty()
+  maxReservedStudents: string;
 }
