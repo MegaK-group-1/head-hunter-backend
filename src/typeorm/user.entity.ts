@@ -24,4 +24,9 @@ export class Users {
         default: ''
     })
     emailAddress: string;
+
+    @Column({
+        default: () => 'CURRENT_TIMESTAMP',
+    })
+    createdAt: Date;
 }
