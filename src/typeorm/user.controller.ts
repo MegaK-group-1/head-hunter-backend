@@ -1,4 +1,4 @@
-import {Body, Controller, Get, HttpStatus, Param, Post, Redirect, Res} from "@nestjs/common";
+import {Body, Controller, Get, HttpStatus, Param, Post, Redirect, Res, Headers} from "@nestjs/common";
 import {Users} from "./user.entity";
 import {UserService} from "./user.service";
 
@@ -6,11 +6,18 @@ import {UserService} from "./user.service";
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
-    @Post()
-    async createUser(@Res() response, @Body() user: Users) {
-        const newUser = await this.userService.createUser(user);
-        return response.status(HttpStatus.CREATED).json({newUser})
-    }
+    // @Get('one')
+    // myFirstAction() {
+    //     return '<h1>Hello everybody!</h1>';
+    // }
+
+
+
+    // @Post()
+    // async createUser(@Res() response, @Body() user: Users) {
+    //     const newUser = await this.userService.createUser(user);
+    //     return response.status(HttpStatus.CREATED).json({newUser})
+    // }
     // @Post()
     // createUser(@Body() user: Users) {
     //     // const id = `${Math.floor(Math.random() * 1000)}`;
@@ -23,19 +30,25 @@ export class UserController {
     //     console.log(newUser);
     // }
 
-    @Get()
-    async fetchAll(@Res() response) {
-        const users = await this.userService.getUsers();
-        console.log(users);
-        // return response.status(HttpStatus.OK).json({users});
-        return response.status(HttpStatus.OK).json(users);
-    }
+    // @Get()
+    // async fetchAll(@Res() response) {
+    //     const users = await this.userService.getUsers();
+    //     console.log(users);
+    //     // return response.status(HttpStatus.OK).json({users});
+    //     return response.status(HttpStatus.OK).json(users);
+    // }
     // @Get()
     // async getUsers(): Promise<Users[]> {
     //     const userList = await this.userService.getUsers();
     //     console.log(userList);
     //     return userList;
     // }
+    @Get('/')
+    async getUsers(): Promise<Users[]> {
+        return this.userService.getUsers();
+    }
+
+
 
     // @Get('/:id')
     // async findById(@Res() response, @Param('id') id) {
