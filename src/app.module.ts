@@ -2,10 +2,10 @@ import {Module} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AppService} from './app.service';
 import {TypeOrmModule} from "@nestjs/typeorm";
-import entities, {Users} from "./typeorm";
-import {UserModule} from './typeorm/user.module';
-import {UserController} from "./typeorm/user.controller";
-import {UserService} from "./typeorm/user.service";
+import entities, {Users} from "./User";
+import {UserModule} from './User/user.module';
+import {UserController} from "./User/user.controller";
+import {UserService} from "./User/user.service";
 
 @Module({
     imports: [
