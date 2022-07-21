@@ -1,7 +1,7 @@
-import {User} from "./User";
+import {Users} from "./Users";
 import {HRAgent} from "./HRAgent";
 
-const entities = [User, HRAgent];
+const entities = [Users, HRAgent];
 
-export {User, HRAgent};
+export {Users, HRAgent};
 export default entities;
