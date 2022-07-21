@@ -1,12 +1,10 @@
 import {Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {UserInterface} from "../interfaces/user.interface";
 
 @Entity()
 export class Users {
-    @PrimaryGeneratedColumn({
-        type: 'bigint',
-        name: 'user_id'
-    })
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @Column({
         nullable: false,
