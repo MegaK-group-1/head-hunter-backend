@@ -4,21 +4,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { config } from './config/db/db.config';
 @Module({
-  imports: [
-    UsersModule,
-    AuthModule,
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'head_hunters',
-      entities: [],
-      synchronize: true,
-    }),
-  ],
+  imports: [UsersModule, AuthModule, TypeOrmModule.forRoot(config)],
   controllers: [AppController],
   providers: [AppService],
 })

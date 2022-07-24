@@ -59,7 +59,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   expectedContractType: string;
 
-  @IsString({})
+  @IsString()
   @IsOptional()
   expectedSalary: string;
 

@@ -8,7 +8,11 @@ import {
   Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, CreateUserHrDto } from './dto/create-user.dto';
+import {
+  CreateUserDto,
+  CreateUserHrDto,
+  CreateUserAdminDto,
+} from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserObj } from 'src/decorators/userobj.decorator';
 
@@ -24,6 +28,11 @@ export class UsersController {
   @Post('hr')
   createUserHr(@Body() createUserDto: CreateUserHrDto) {
     return this.usersService.createUserHr(createUserDto);
+  }
+  //TODO: wstęp tylko dla admina - zabezpieczyc
+  @Post('admin')
+  createUserAdmin(@Body() createUserDto: CreateUserAdminDto) {
+    return this.usersService.createUserAdmin(createUserDto);
   }
 
   @Get()
