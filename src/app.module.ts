@@ -8,7 +8,7 @@ import {AuthModule} from './auth/auth.module';
 import {config} from './config/db/db.config';
 @Module({
   imports: [UsersModule, AuthModule, ConfigModule.forRoot(), TypeOrmModule.forRoot(config)],
-  controllers: [AppController],
+      controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
