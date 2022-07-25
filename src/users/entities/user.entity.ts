@@ -12,7 +12,7 @@ export class User extends BaseEntity {
   email: string;
 
   @Column()
-  pwd: string;
+  pwdHash: string;
 
   @Column({
     nullable: true,
@@ -33,6 +33,14 @@ export class User extends BaseEntity {
     default: null,
   })
   isActive: boolean | null;
+
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  @PrimaryGeneratedColumn('uuid')
+  @Column({ nullable: true })
+  activeToken: string | null;
 
   @Column({
     nullable: true,
