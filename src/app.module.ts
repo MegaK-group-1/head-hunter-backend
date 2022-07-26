@@ -5,13 +5,17 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { config } from './config/db/db.config';
+import { loadDatabaseConfig } from './config/db/db.loader';
 @Module({
   imports: [
     UsersModule,
     AuthModule,
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot(config),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        return loadDatabaseConfig();
+      },
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
