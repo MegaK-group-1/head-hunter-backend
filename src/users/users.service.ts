@@ -9,7 +9,7 @@ import {
 } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { userRole } from 'src/types/user';
+import { userRole } from 'src/types/users/user';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +19,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const user = new User();
     Object.assign(user, createUserDto);
-    user.pwdHash = hashPwd(createUserDto.password);
+    user.password = hashPwd(createUserDto.password);
     user.role = userRole.STUDENT;
     //TODO: tu ma sie znalezc email service ktory wysyla emeila z active token
     return await this.userRepository.save(user);
@@ -28,7 +28,7 @@ export class UsersService {
   async createUserHr(createUserDto: CreateUserHrDto): Promise<User> {
     const user = new User();
     Object.assign(user, createUserDto);
-    user.pwdHash = hashPwd(createUserDto.password);
+    user.password = hashPwd(createUserDto.password);
     user.role = userRole.HR;
     //TODO: tu ma sie znalezc email service ktory wysyla emeila z active token
     return await this.userRepository.save(user);
@@ -36,7 +36,7 @@ export class UsersService {
   async createUserAdmin(createUserDto: CreateUserAdminDto): Promise<User> {
     const user = new User();
     Object.assign(user, createUserDto);
-    user.pwdHash = hashPwd(createUserDto.password);
+    user.password = hashPwd(createUserDto.password);
     user.role = userRole.ADMIN;
     //TODO: tu ma sie znalezc email service ktory wysyla emeila z active token
     return await this.userRepository.save(user);

@@ -1,9 +1,27 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { studentStatus, userRole } from '../../types/user';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { studentStatus, userRole } from '../../types/users/user';
+import { UserDetails } from './user.details.entity';
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @OneToMany(() => User, (entity) => entity.hr, { onDelete: 'SET NULL' })
+  student: User[] | null;
+
+  @ManyToOne(() => User, (entity) => entity.student)
+  hr: User | null;
+
+  @OneToOne(() => UserDetails, (entity) => entity.user)
+  userDetails: UserDetails | null;
 
   @Column({
     unique: true,
@@ -11,176 +29,14 @@ export class User extends BaseEntity {
   })
   email: string;
 
-  @Column()
-  pwdHash: string;
+  @Column({ length: 50 })
+  firstName: string;
 
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  currentTokenId: string | null;
+  @Column({ length: 50 })
+  lastName: string;
 
-  @Column({
-    nullable: false,
-    default: 'student',
-  })
-  role: userRole;
-
-  //Students Status
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  isActive: boolean | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  @PrimaryGeneratedColumn('uuid')
-  @Column({ nullable: true })
-  activeToken: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  status: studentStatus | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  phone: number | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  firstName: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  lastName: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  githubUsername: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  portfolioUrls: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  projectUrls: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  bio: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  expectedTypeWork: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  targetWorkCity: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  expectedContractType: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  expectedSalary: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  canTakeApprenticeship: boolean | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  monthsOfCommercialExp: number | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  education: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  workExperience: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  courses: string | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  courseCompletion: number | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  courseEngagment: number | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  projectDegree: number | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  teamProjectDegree: number | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  bonusProjectUrls: string | null;
-
-  // HR
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  fullName: string | null;
+  @Column({ length: 72 })
+  password: string;
 
   @Column({
     nullable: true,
@@ -191,6 +47,31 @@ export class User extends BaseEntity {
   @Column({
     nullable: true,
     default: null,
+  })
+  registerToken: string | null;
+
+  @Column({
+    type: 'enum',
+    default: 'student',
+    enum: userRole,
+  })
+  role: userRole;
+
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  @Column({
+    nullable: true,
+    default: null,
+  })
+  status: studentStatus | null;
+
+  @Column({
+    nullable: true,
+    default: null,
+    type: 'tinyint',
+    unsigned: true,
   })
   maxReservedStudents: number | null;
 }
