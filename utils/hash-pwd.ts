@@ -7,8 +7,11 @@ export const hashToken = (p: string): string => {
   return hmac.digest('hex');
 };
 
-export const hashPwd = (password: string): string =>
-  bcrypt.hashSync(password, 10);
+export const hashPwd = (p: string): string => {
+  const hmac = crypto.createHmac('sha512', process.env.SALT);
+  hmac.update(p);
+  return hmac.digest('hex');
+};
 
 export const comparePwd = async (
   password: string,
