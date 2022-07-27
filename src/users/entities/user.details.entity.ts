@@ -37,6 +37,12 @@ export class UserDetails extends BaseEntity {
     type: 'tinyint',
     unsigned: true,
   })
+  projectDegree: number;
+
+  @Column({
+    type: 'tinyint',
+    unsigned: true,
+  })
   teamProjectDegree: number;
 
   @Column({
@@ -57,12 +63,6 @@ export class UserDetails extends BaseEntity {
     unsigned: true,
   })
   phone: number | null;
-
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  projectUrls: string | null;
 
   @Column({
     nullable: true,
