@@ -98,8 +98,6 @@ export class UsersService {
           const user = new User();
           const userDetails = new UserDetails();
           user.email = email;
-          user.firstName = '';
-          user.lastName = '';
           userDetails.projectDegree = projectDegree;
           userDetails.bonusProjectUrls = bonusProjectUrls;
           userDetails.teamProjectDegree = teamProjectDegree;
