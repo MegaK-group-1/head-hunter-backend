@@ -1,3 +1,5 @@
+import { ImportError } from './import';
+
 export enum userRole {
   ADMIN = 'admin',
   HR = 'hr',
@@ -24,6 +26,11 @@ export enum ExpectedContractType {
   'NO_MATTER' = 'no_matter',
 }
 
-export type registerUserResponse = {
+export interface RegisterUserResponse {
   isSuccess: true;
-};
+}
+
+export interface ImportUsersResponse {
+  imported: string[];
+  errors: ImportError[];
+}

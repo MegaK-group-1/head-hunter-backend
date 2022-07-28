@@ -7,33 +7,28 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFiles,
   UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
-  CreateUserDto,
   CreateUserHrDto,
   CreateUserAdminDto,
+  CreateUserDto,
 } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserObj } from 'src/decorators/userobj.decorator';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
-import { FileImport } from '../types';
-import { dirname } from 'path';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileImport, ImportUsersResponse } from "../types";
 import { storagePath } from '../config/storage/storage.config';
 
 @Controller('/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Post()
-  // create(@Body() createUserDto: CreateUserDto) {
-  //   return this.usersService.create(createUserDto);
-  // }
+  @Post('/register')
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
 
   // TODO: wstęp tylko dla admina - zabezpieczyc
   @Post('/hr')
@@ -51,7 +46,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
+  @Get('/:id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
@@ -77,7 +72,9 @@ export class UsersController {
 
   @Post('/')
   @UseInterceptors(FileInterceptor('usersCsv', { dest: storagePath }))
-  async importFromCsv(@UploadedFile() file: FileImport) {
-    await this.usersService.importFromCsv(file);
+  async importFromCsv(
+    @UploadedFile() file: FileImport,
+  ): Promise<ImportUsersResponse> {
+    return await this.usersService.importFromCsv(file);
   }
 }
