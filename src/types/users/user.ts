@@ -27,3 +27,8 @@ export enum ExpectedContractType {
 export type registerUserResponse = {
   isSuccess: true;
 };
+
+export interface UserLoginReq {
+  email: string;
+  password: string;
+}

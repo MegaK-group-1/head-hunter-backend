@@ -19,7 +19,7 @@ USE `head_hunters`;
 
 -- Zrzut struktury tabela head_hunters.admin
 CREATE TABLE IF NOT EXISTS `admin` (
-  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT uuid(),
+  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(254) COLLATE utf8mb4_unicode_ci NOT NULL,
   `fullName` varchar(75) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `hr_coordinator` (
   `fullName` varchar(75) COLLATE utf8mb4_unicode_ci NOT NULL,
   `company` varchar(82) COLLATE utf8mb4_unicode_ci NOT NULL,
   `maxReservedStudents` int(3) unsigned NOT NULL DEFAULT 1,
-  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT uuid(),
+  `id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
   `roleId` enum('hr') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'hr',
   `registerToken` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
