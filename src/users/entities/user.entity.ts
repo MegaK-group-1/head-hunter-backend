@@ -29,14 +29,14 @@ export class User extends BaseEntity {
   })
   email: string;
 
-  @Column({ length: 50 })
-  firstName: string;
+  @Column({ length: 50, nullable: true, default: null })
+  firstName: string | null;
 
-  @Column({ length: 50 })
-  lastName: string;
+  @Column({ length: 50, nullable: true, default: null })
+  lastName: string | null;
 
-  @Column({ length: 72 })
-  password: string;
+  @Column({ length: 72, nullable: true, default: null })
+  password: string | null;
 
   @Column({
     nullable: true,

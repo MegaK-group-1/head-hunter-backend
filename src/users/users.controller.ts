@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFiles,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -15,28 +18,35 @@ import {
 } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserObj } from 'src/decorators/userobj.decorator';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
+import { FileImport } from '../types';
+import { dirname } from 'path';
+import { storagePath } from '../config/storage/storage.config';
 
-@Controller('users')
+@Controller('/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
+  // @Post()
+  // create(@Body() createUserDto: CreateUserDto) {
+  //   return this.usersService.create(createUserDto);
+  // }
 
   // TODO: wstęp tylko dla admina - zabezpieczyc
-  @Post('hr')
+  @Post('/hr')
   createUserHr(@Body() createUserDto: CreateUserHrDto) {
     return this.usersService.createUserHr(createUserDto);
   }
   // TODO: wstęp tylko dla admina - zabezpieczyc
-  @Post('admin')
+  @Post('/admin')
   createUserAdmin(@Body() createUserDto: CreateUserAdminDto) {
     return this.usersService.createUserAdmin(createUserDto);
   }
 
-  @Get()
+  @Get('/')
   findAll() {
     return this.usersService.findAll();
   }
@@ -47,21 +57,27 @@ export class UsersController {
   }
 
   // TODO: wstęp tylko dla zalogowanego, rework
-  @Get('me')
+  @Get('/me')
   getMe(@Param('id') id: string) {
     console.log({ id });
     return 'id';
   }
 
   // TODO: wstęp tylko dla zalogowanego, rework
-  @Patch(':id')
+  @Patch('/:id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
   // TODO: wstęp tylko dla admina - zabezpieczyc
-  @Delete(':id')
+  @Delete('/:id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Post('/')
+  @UseInterceptors(FileInterceptor('usersCsv', { dest: storagePath }))
+  async importFromCsv(@UploadedFile() file: FileImport) {
+    await this.usersService.importFromCsv(file);
   }
 }
