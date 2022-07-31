@@ -17,11 +17,8 @@ import {
 } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserObj } from 'src/decorators/userobj.decorator';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
-import { FileImport } from '../types';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileImport, ImportUsersResponse } from "../types";
 import { storagePath } from '../config/storage/storage.config';
 
 @Controller('/users')
@@ -48,7 +45,9 @@ export class UsersController {
 
   @Post('/')
   @UseInterceptors(FileInterceptor('usersCsv', { dest: storagePath }))
-  async importFromCsv(@UploadedFile() file: FileImport) {
-    await this.usersService.importFromCsv(file);
+  async importFromCsv(
+    @UploadedFile() file: FileImport,
+  ): Promise<ImportUsersResponse> {
+    return await this.usersService.importFromCsv(file);
   }
 }

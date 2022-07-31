@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ExpectedContractType, ExpectedTypeWork } from '../../types/users/user';
+import { ExpectedContractType, ExpectedTypeWork } from '../../types';
 import { User } from './user.entity';
 import { JoinColumn } from 'typeorm';
 

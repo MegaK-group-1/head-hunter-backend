@@ -1,4 +1,7 @@
 export enum UserRole {
+import { ImportError } from './import';
+
+export enum userRole {
   ADMIN = 'admin',
   HR = 'hr',
   STUDENT = 'student',
@@ -22,4 +25,13 @@ export enum ExpectedContractType {
   'B2B' = 'b2b',
   'UZ/UOD' = 'uz/uod',
   'NO_MATTER' = 'no_matter',
+}
+
+export interface RegisterUserResponse {
+  isSuccess: true;
+}
+
+export interface ImportUsersResponse {
+  imported: string[];
+  errors: ImportError[];
 }
