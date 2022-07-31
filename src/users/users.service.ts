@@ -17,6 +17,7 @@ import { storagePath } from '../config/storage/storage.config';
 import { ImportUserDto } from './dto/import-user.dto';
 
 import { UserDetails } from './entities/user.details.entity';
+import { JwtPayload } from '../auth/jwt.strategy';
 
 @Injectable()
 export class UsersService {
@@ -35,34 +36,14 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
-  async createUserHr(createUserDto: CreateUserHrDto): Promise<User> {
-    const user = new User();
-    Object.assign(user, createUserDto);
-    user.password = hashPwd(createUserDto.password);
-    user.role = userRole.HR;
-    //TODO: tu ma sie znalezc email service ktory wysyla emeila z active token
-    return await this.userRepository.save(user);
+  async findOneByPayload(payload: JwtPayload): Promise<User | null> {
+    const user = await User.findOne({ where: { id: payload.id } });
+    return user ?? null;
   }
 
-  async createUserAdmin(createUserDto: CreateUserAdminDto): Promise<User> {
-    const user = new User();
-    Object.assign(user, createUserDto);
-    user.password = hashPwd(createUserDto.password);
-    user.role = userRole.ADMIN;
-    //TODO: tu ma sie znalezc email service ktory wysyla emeila z active token
-    return await this.userRepository.save(user);
-  }
-
-  async findAll() {
-    return await User.find({ where: { role: userRole.STUDENT } });
-  }
-
-  async findOne(id: string): Promise<User> {
-    const user = await User.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException('user  not found');
-    }
-    return user;
+  async findOneByEmail(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    return user ?? null;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

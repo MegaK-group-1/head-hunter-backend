@@ -24,6 +24,3 @@ export enum ExpectedContractType {
   'NO_MATTER' = 'no_matter',
 }
 
-export type registerUserResponse = {
-  isSuccess: true;
-};
