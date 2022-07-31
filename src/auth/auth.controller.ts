@@ -26,7 +26,7 @@ export class AuthController {
   @Post('/remind-password')
   async remindPassword(
       @Body() req: AuthRemindPwdDto,
-  ): Promise<string> {
+  ): Promise<any> {
     return this.authService.remindPassword(req);
   }
 
