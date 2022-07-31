@@ -8,3 +8,8 @@ export type FileImport =
       encoding: string;
     }
   | undefined;
+
+export interface ImportError {
+  row: number;
+  errorMessage: string;
+}

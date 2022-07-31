@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { hashPwd } from 'utils/hash-pwd';
@@ -9,14 +13,15 @@ import {
 } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { userRole } from 'src/types/users/user';
-import { FileImport } from '../types';
+import { ImportUsersResponse, userRole } from 'src/types/users/user';
+import { FileImport, ImportError } from '../types';
 import { parse, ParseResult } from 'papaparse';
 import { readFile, unlink } from 'fs/promises';
 import { storagePath } from '../config/storage/storage.config';
 import { ImportUserDto } from './dto/import-user.dto';
 
 import { UserDetails } from './entities/user.details.entity';
+import { validate, ValidationError } from 'class-validator';
 
 @Injectable()
 export class UsersService {
@@ -74,7 +79,7 @@ export class UsersService {
     return await user.remove();
   }
 
-  async importFromCsv(file: FileImport) {
+  async importFromCsv(file: FileImport): Promise<ImportUsersResponse> {
     try {
       if (file) {
         const csvData = await readFile(
@@ -83,9 +88,10 @@ export class UsersService {
         );
 
         const parseResult = await this.parseCsv(csvData);
-        if (parseResult.errors.length !== 0) {
-          throw new Error('Oh no');
-        }
+
+        const addedEmails: string[] = [];
+        const importErrors: ImportError[] = [];
+        let row = 1;
 
         for (const {
           email,
@@ -95,22 +101,71 @@ export class UsersService {
           courseCompletion,
           courseEngagment,
         } of parseResult.data) {
+          const userDto = new ImportUserDto();
+          userDto.email = email;
+          userDto.projectDegree = projectDegree;
+          userDto.bonusProjectUrls = bonusProjectUrls;
+          userDto.teamProjectDegree = teamProjectDegree;
+          userDto.courseCompletion = courseCompletion;
+          userDto.courseEngagment = courseEngagment;
+          const errors = await validate(userDto);
+
+          if (errors.length > 0) {
+            let errorMessage = '';
+            for (const err of errors) {
+              for (const prop in err.constraints) {
+                errorMessage += ' ' + err.constraints[prop];
+              }
+            }
+            importErrors.push({
+              row,
+              errorMessage,
+            });
+            row++;
+            continue;
+          }
+
+          const isUser = await this.userRepository.findOne({
+            where: { email },
+          });
+
+          if (isUser) {
+            importErrors.push({
+              row,
+              errorMessage: `email ${email} already exists`,
+            });
+            row++;
+            continue;
+          }
+
           const user = new User();
-          const userDetails = new UserDetails();
           user.email = email;
-          userDetails.projectDegree = projectDegree;
-          userDetails.bonusProjectUrls = bonusProjectUrls;
-          userDetails.teamProjectDegree = teamProjectDegree;
-          userDetails.courseCompletion = courseCompletion;
-          userDetails.courseEngagment = courseEngagment;
+
+          const userDetails = UserDetails.create({ email, ...userDto });
 
           await this.userDetailsRepository.save(userDetails);
 
           user.userDetails = userDetails;
 
           await user.save();
+
+          addedEmails.push(email);
+          row++;
         }
+
+        if (addedEmails.length === 0) {
+          throw new BadRequestException(
+            'No record Added, your csv file has probably wrong structure try again',
+          );
+        }
+
+        return {
+          imported: addedEmails,
+          errors: importErrors,
+        };
       }
+
+      throw new NotFoundException('Csv File not Found');
     } catch (e) {
       await unlink(`${storagePath}/${file.filename}`);
       throw e;
