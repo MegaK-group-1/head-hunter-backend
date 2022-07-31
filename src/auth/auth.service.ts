@@ -6,6 +6,7 @@ import { PasswordService } from './password/password.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
+import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -34,31 +35,29 @@ export class AuthService {
     loginDto: LoginDto,
     initialLogin?: User,
   ): Promise<{ accessToken: string; expiresIn: number }> {
-    try {
-      if (!initialLogin) {
-        const user = await this.checkUser(loginDto.email, loginDto.password);
+    if (!initialLogin) {
+      const user = await this.checkUser(loginDto.email, loginDto.password);
 
-        if (!user) {
-          throw new UnauthorizedException('Password or Email is invalid');
-        }
-
-        const { expiresIn, accessToken } = await this.createToken(user.id);
-
-        return {
-          accessToken,
-          expiresIn,
-        };
-      } else {
-        const { expiresIn, accessToken } = await this.createToken(
-          initialLogin.id,
-        );
-
-        return {
-          accessToken,
-          expiresIn,
-        };
+      if (!user) {
+        throw new UnauthorizedException('Password or Email is invalid');
       }
-    } catch (e) {}
+
+      const { expiresIn, accessToken } = await this.createToken(user.id);
+
+      return {
+        accessToken,
+        expiresIn,
+      };
+    } else {
+      const { expiresIn, accessToken } = await this.createToken(
+        initialLogin.id,
+      );
+
+      return {
+        accessToken,
+        expiresIn,
+      };
+    }
   }
 
   async checkUser(email: string, password: string): Promise<User | null> {
@@ -78,7 +77,7 @@ export class AuthService {
     userId: string,
   ): Promise<{ accessToken: string; expiresIn: number }> {
     const payload: JwtPayload = { id: userId };
-    const expiresIn = 60 * 60 * 24;
+    const expiresIn = 60;
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_KEY,
       expiresIn,

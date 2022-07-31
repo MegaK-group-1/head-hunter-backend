@@ -23,4 +23,3 @@ export enum ExpectedContractType {
   'UZ/UOD' = 'uz/uod',
   'NO_MATTER' = 'no_matter',
 }
-

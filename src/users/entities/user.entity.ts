@@ -7,7 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { studentStatus, UserRole } from '../../types/users/user';
+import { studentStatus, UserRole } from '../../types';
 import { UserDetails } from './user.details.entity';
 @Entity()
 export class User extends BaseEntity {
@@ -35,7 +35,7 @@ export class User extends BaseEntity {
   @Column({ length: 50, nullable: true, default: null })
   lastName: string | null;
 
-  @Column({ length: 72, nullable: true, default: null })
+  @Column({ length: 150, nullable: true, default: null })
   password: string | null;
 
   @Column({

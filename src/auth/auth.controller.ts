@@ -13,7 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserObj } from '../decorators/userobj.decorator';
 import { User } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
-import { LoginUserResponse, RegisterUserResponse } from "../types";
+import { LoginUserResponse, RegisterUserResponse } from '../types';
 import { RegisterDto } from './dto/register.dto';
 
 @Controller('/auth')
@@ -33,6 +33,7 @@ export class AuthController {
         domain: 'localhost',
         httpOnly: true,
       })
+      .status(201)
       .json({ success: true } as RegisterUserResponse);
   }
 
@@ -45,6 +46,7 @@ export class AuthController {
         domain: 'localhost',
         httpOnly: true,
       })
+      .status(200)
       .json({ success: true } as LoginUserResponse);
   }
   //

@@ -1,19 +1,19 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { User } from "./entities/user.entity";
-import { UserRole } from "src/types/users/user";
-import { FileImport } from "../types";
-import { parse, ParseResult } from "papaparse";
-import { readFile, unlink } from "fs/promises";
-import { storagePath } from "../config/storage/storage.config";
-import { ImportUserDto } from "./dto/import-user.dto";
-import { UserDetails } from "./entities/user.details.entity";
-import { JwtPayload } from "../auth/jwt.strategy";
-import { PasswordService } from "../auth/password/password.service";
-import { RegisterDto } from "../auth/dto/register.dto";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+import { UserRole } from 'src/types/users/user';
+import { FileImport } from '../types';
+import { parse, ParseResult } from 'papaparse';
+import { readFile, unlink } from 'fs/promises';
+import { storagePath } from '../config/storage/storage.config';
+import { ImportUserDto } from './dto/import-user.dto';
+import { UserDetails } from './entities/user.details.entity';
+import { JwtPayload } from '../auth/jwt.strategy';
+import { PasswordService } from '../auth/password/password.service';
+import { RegisterDto } from '../auth/dto/register.dto';
 
 @Injectable()
 export class UsersService {
