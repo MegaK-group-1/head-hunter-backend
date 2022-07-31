@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import {
   BadRequestException,
   Injectable,
@@ -9,9 +8,11 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { UserRole } from 'src/types/users/user';
-import { FileImport } from '../types';
-import { ImportUsersResponse, userRole } from 'src/types/users/user';
+import {
+  ImportUsersResponse,
+  UserRole,
+  UserStatus,
+} from 'src/types/users/user';
 import { FileImport, ImportError } from '../types';
 import { parse, ParseResult } from 'papaparse';
 import { readFile, unlink } from 'fs/promises';
@@ -21,7 +22,7 @@ import { UserDetails } from './entities/user.details.entity';
 import { JwtPayload } from '../auth/jwt.strategy';
 import { PasswordService } from '../auth/password/password.service';
 import { RegisterDto } from '../auth/dto/register.dto';
-import { validate, ValidationError } from 'class-validator';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class UsersService {
@@ -45,9 +46,11 @@ export class UsersService {
     user.firstName = registerDto.firstName;
     user.lastName = registerDto.lastName;
     user.password = this.passwordService.hashPassword(registerDto.password);
+    user.status = UserStatus.ACTIVE;
     if (user.role === UserRole.STUDENT) {
       user.userDetails.phone = registerDto.phone ?? null;
       user.userDetails.githubUsername = registerDto.githubUserName ?? null; //TODO github check
+      await this.userDetailsRepository.save(user.userDetails);
     }
 
     await this.userRepository.save(user);
@@ -98,9 +101,11 @@ export class UsersService {
           teamProjectDegree,
           courseCompletion,
           courseEngagment,
+          role,
         } of parseResult.data) {
           const userDto = new ImportUserDto();
           userDto.email = email;
+          userDto.role = role;
           userDto.projectDegree = projectDegree;
           userDto.bonusProjectUrls = bonusProjectUrls;
           userDto.teamProjectDegree = teamProjectDegree;
@@ -138,8 +143,9 @@ export class UsersService {
 
           const user = new User();
           user.email = email;
+          user.role = role;
 
-          const userDetails = UserDetails.create({ email, ...userDto });
+          const userDetails = UserDetails.create({ email, role, ...userDto });
 
           await this.userDetailsRepository.save(userDetails);
 

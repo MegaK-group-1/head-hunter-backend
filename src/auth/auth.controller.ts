@@ -13,7 +13,11 @@ import { AuthGuard } from '@nestjs/passport';
 import { UserObj } from '../decorators/userobj.decorator';
 import { User } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
-import { LoginUserResponse, RegisterUserResponse } from '../types';
+import {
+  LoginUserResponse,
+  LogoutUserResponse,
+  RegisterUserResponse,
+} from '../types';
 import { RegisterDto } from './dto/register.dto';
 
 @Controller('/auth')
@@ -49,17 +53,23 @@ export class AuthController {
       .status(200)
       .json({ success: true } as LoginUserResponse);
   }
+
+  @Get('/logout')
+  @UseGuards(AuthGuard('jwt'))
+  async logout(@UserObj() user: User, @Res() res: Response) {
+    res.clearCookie('jwt', {
+      secure: false,
+      domain: 'localhost',
+      httpOnly: true,
+    });
+    return res.json({ success: true } as LogoutUserResponse);
+  }
+
   //
   // @Post('/remind-password')
   // async remindPassword(
   //     @Body() req: AuthRemindPwdDto,
   // ): Promise<string> {
   //   return this.authService.remindPassword(req);
-  // }
-
-  // @Get('/logout')
-  // @UseGuards(AuthGuard('jwt'))
-  // async logout(@UserObj() user: User, @Res() res: Response) {
-  //   return this.authService.logout(user, res);
   // }
 }

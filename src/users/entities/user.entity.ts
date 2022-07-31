@@ -7,7 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { studentStatus, UserRole } from '../../types';
+import { UserRole, UserStatus } from '../../types';
 import { UserDetails } from './user.details.entity';
 @Entity()
 export class User extends BaseEntity {
@@ -52,20 +52,17 @@ export class User extends BaseEntity {
 
   @Column({
     type: 'enum',
-    default: 'student',
     enum: UserRole,
+    default: UserRole.STUDENT,
   })
   role: UserRole;
 
   @Column({
-    nullable: true,
-    default: null,
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.INACTIVE,
   })
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  status: studentStatus | null;
+  status: UserStatus;
 
   @Column({
     nullable: true,

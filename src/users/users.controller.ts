@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -18,7 +19,7 @@ import {
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserObj } from 'src/decorators/userobj.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FileImport, ImportUsersResponse } from "../types";
+import { FileImport, ImportUsersResponse } from '../types';
 import { storagePath } from '../config/storage/storage.config';
 
 @Controller('/users')

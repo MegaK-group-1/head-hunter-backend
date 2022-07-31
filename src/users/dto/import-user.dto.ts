@@ -1,8 +1,12 @@
-import { IsEmail, IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsEmail, IsEnum, IsNumber, IsString, Max, Min } from 'class-validator';
+import { UserRole } from '../../types';
 
 export class ImportUserDto {
   @IsEmail()
   email: string;
+
+  @IsEnum([UserRole.STUDENT])
+  role: UserRole.STUDENT;
 
   @IsNumber()
   @Min(0)

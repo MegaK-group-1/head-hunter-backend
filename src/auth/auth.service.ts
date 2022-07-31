@@ -77,7 +77,7 @@ export class AuthService {
     userId: string,
   ): Promise<{ accessToken: string; expiresIn: number }> {
     const payload: JwtPayload = { id: userId };
-    const expiresIn = 60;
+    const expiresIn = 60 * 60 * 24; //1d
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_KEY,
       expiresIn,
@@ -87,21 +87,6 @@ export class AuthService {
       expiresIn,
     };
   }
-
-  // async logout(user: User, res: Response) {
-  //   try {
-  //     user.registerToken = null;
-  //     await user.save();
-  //     res.clearCookie('jwt', {
-  //       secure: false,
-  //       domain: 'localhost',
-  //       httpOnly: true,
-  //     });
-  //     return res.json({ ok: true });
-  //   } catch (e) {
-  //     return res.json({ error: e.message });
-  //   }
-  // }
 
   // async remindPassword(req: AuthRemindPwdDto) {
   //   const user = await this.userRepository.findOne({

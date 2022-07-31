@@ -1,15 +1,15 @@
-export enum UserRole {
 import { ImportError } from './import';
 
-export enum userRole {
+export enum UserRole {
   ADMIN = 'admin',
   HR = 'hr',
   STUDENT = 'student',
 }
 
-export enum studentStatus {
-  AVAILABLE = 'available',
-  IN_CONVERSATION = 'in_conversation',
+export enum UserStatus {
+  INACTIVE = 'inactive',
+  ACTIVE = 'active',
+  EMPLOYED = 'employed',
 }
 
 export enum ExpectedTypeWork {
@@ -25,10 +25,6 @@ export enum ExpectedContractType {
   'B2B' = 'b2b',
   'UZ/UOD' = 'uz/uod',
   'NO_MATTER' = 'no_matter',
-}
-
-export interface RegisterUserResponse {
-  isSuccess: true;
 }
 
 export interface ImportUsersResponse {

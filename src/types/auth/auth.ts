@@ -3,3 +3,5 @@ export type LoginUserResponse = {
 };
 
 export type RegisterUserResponse = LoginUserResponse;
+
+export type LogoutUserResponse = RegisterUserResponse;
