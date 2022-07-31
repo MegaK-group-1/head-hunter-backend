@@ -1,4 +1,4 @@
-import {Injectable} from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import {Response} from 'express';
 import {User} from "../users/entities/user.entity";
 import {hashPwd} from "../../utils/hash-pwd";
@@ -8,11 +8,13 @@ import {JwtPayload} from "./jwt.strategy";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {AuthRemindPwdDto} from "./dto/auth-remind-pwd.dto";
+import {MailService} from "../mail/mail.service";
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectRepository(User) private userRepository: Repository<User>,
+        @Inject(MailService) private mailService: MailService
     ) {}
     private createToken(currentTokenId: string): { accessToken: string, expiresIn: number } {
         const payload: JwtPayload = {id: currentTokenId};
@@ -87,7 +89,7 @@ export class AuthService {
         const newRandomPassword =  'hTY56$-5h';
         user.password = hashPwd(newRandomPassword);
         await this.userRepository.save(user);
-        return `Twoje nowe hasło to: ${newRandomPassword}`
+        await this.mailService.sendMail('lol@lol.pl', 'temat', `Twoje nowe hasło to: ${newRandomPassword}`);
     }
 
 }
