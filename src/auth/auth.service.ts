@@ -1,13 +1,11 @@
-import { Body, Injectable. UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from '../users/entities/user.entity';
-import { v4 as uuid } from 'uuid';
-import { sign } from 'jsonwebtoken';
 import { JwtPayload } from './jwt.strategy';
 import { UsersService } from '../users/users.service';
 import { PasswordService } from './password/password.service';
 import { LoginDto } from './dto/login.dto';
-import { JwtService } from "@nestjs/jwt";
-import { LoginUserResponse } from "../types";
+import { JwtService } from '@nestjs/jwt';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -17,21 +15,50 @@ export class AuthService {
     private passwordService: PasswordService,
   ) {}
 
-  async login(@Body() loginDto: LoginDto): Promise<{accessToken: string, expiresIn: number}> {
-    try {
-      const user = await this.checkUser(loginDto.email, loginDto.password);
-
-      if (!user) {
-        throw new UnauthorizedException('Password or Email is invalid');
-      }
-      const {expiresIn, accessToken } = this.createToken(user.id);
-
-      return {
-        accessToken,
-        expiresIn
-      }
-    } catch (e) {
+  async register(
+    registerDto: RegisterDto,
+    userId: string,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
+    const user = await this.usersService.findOneById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User Not Found');
     }
+    await this.usersService.register(registerDto, user);
+    return await this.login(
+      { email: user.email, password: registerDto.password },
+      user,
+    );
+  }
+
+  async login(
+    loginDto: LoginDto,
+    initialLogin?: User,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
+    try {
+      if (!initialLogin) {
+        const user = await this.checkUser(loginDto.email, loginDto.password);
+
+        if (!user) {
+          throw new UnauthorizedException('Password or Email is invalid');
+        }
+
+        const { expiresIn, accessToken } = await this.createToken(user.id);
+
+        return {
+          accessToken,
+          expiresIn,
+        };
+      } else {
+        const { expiresIn, accessToken } = await this.createToken(
+          initialLogin.id,
+        );
+
+        return {
+          accessToken,
+          expiresIn,
+        };
+      }
+    } catch (e) {}
   }
 
   async checkUser(email: string, password: string): Promise<User | null> {
@@ -47,45 +74,35 @@ export class AuthService {
     return await this.usersService.findOneByPayload(payload);
   }
 
-  private createToken(userId: string): {accessToken: string, expiresIn: number} {
+  private async createToken(
+    userId: string,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
     const payload: JwtPayload = { id: userId };
     const expiresIn = 60 * 60 * 24;
-    const accessToken = sign(payload, process.env.JWT_KEY, { expiresIn });
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_KEY,
+      expiresIn,
+    });
     return {
       accessToken,
       expiresIn,
     };
   }
 
-  private async generateToken(user: User): Promise<string> {
-    let token;
-    let userWithThisToken = null;
-    do {
-      token = uuid();
-      userWithThisToken = await User.findOne({
-        where: { registerToken: token },
-      });
-    } while (!!userWithThisToken);
-    user.registerToken = token;
-    await user.save();
-
-    return token;
-  }
-
-  async logout(user: User, res: Response) {
-    try {
-      user.registerToken = null;
-      await user.save();
-      res.clearCookie('jwt', {
-        secure: false,
-        domain: 'localhost',
-        httpOnly: true,
-      });
-      return res.json({ ok: true });
-    } catch (e) {
-      return res.json({ error: e.message });
-    }
-  }
+  // async logout(user: User, res: Response) {
+  //   try {
+  //     user.registerToken = null;
+  //     await user.save();
+  //     res.clearCookie('jwt', {
+  //       secure: false,
+  //       domain: 'localhost',
+  //       httpOnly: true,
+  //     });
+  //     return res.json({ ok: true });
+  //   } catch (e) {
+  //     return res.json({ error: e.message });
+  //   }
+  // }
 
   // async remindPassword(req: AuthRemindPwdDto) {
   //   const user = await this.userRepository.findOne({

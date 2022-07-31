@@ -11,15 +11,15 @@ import { JoinColumn } from 'typeorm';
 
 @Entity()
 export class UserDetails extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
   @OneToOne(() => User, (entity) => entity.userDetails, {
     nullable: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
   user: User;
+
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({
     type: 'tinyint',
