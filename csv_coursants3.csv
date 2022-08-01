@@ -1,9 +1,9 @@
-email,courseCompletion,courseEngagment,projectDegree,teamProjectDegree,bonusProjectUrls
-adamsik83@wp.pl,2,1,1,1,https://github.com/adamski83/Todo__MegaK
-eddy122394@gmail.com,3,3,4,3,https://github.com/AdrianeZ
-grzesionmax@gmail.com,2,4,3,3,https://github.com/MegaK-group-1/head-hunter-frontend https://github.com/MegaK-group-1/head-hunter-backend
-j.biernat955@gmail.com,2,2,3,3,https://github.com/j.biernat955
-oohajo@gmail.com,3,3,2,3,https://github.com/oohajo
-patrykkeska4@gmail.com,4,4,3,4,https://github.com/PatrykKeska/company_management_app_front
-pgawzynski.backup@gmail.com,4,4,4,4,https://github.com/PatrykKeska/company_management_app_front
-zannien94@gmail.com,4,0,4,4,https://github.com/zannien94/flight-app-backend https://github.com/zannien94/flight-app-frontend
+email,role,courseCompletion,courseEngagment,projectDegree,teamProjectDegree,bonusProjectUrls
+adamsik83@wp.pl,student,2,1,1,1,https://github.com/adamski83/Todo__MegaK
+eddy122394@gmail.com,student,3,3,4,3,https://github.com/AdrianeZ
+grzesionmax@gmail.com,student,2,4,3,3,https://github.com/MegaK-group-1/head-hunter-frontend https://github.com/MegaK-group-1/head-hunter-backend
+j.biernat955@gmail.com,student,2,2,3,3,https://github.com/j.biernat955
+oohajo@gmail.com,h,3,3,2,3,https://github.com/oohajo
+patrykkeska4@gmail.com,student,4,4,3,4,https://github.com/PatrykKeska/company_management_app_front
+pgawzynski.backup@gmail.com,student,4,4,4,4,https://github.com/PatrykKeska/company_management_app_front
+zannien94@gmail.com,student,4,0,4,4,https://github.com/zannien94/flight-app-backend https://github.com/zannien94/flight-app-frontend

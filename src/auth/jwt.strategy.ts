@@ -1,38 +1,38 @@
 import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { AuthService } from './auth.service';
 import { User } from '../users/entities/user.entity';
 
-
 export interface JwtPayload {
-    id: string;
+  id: string;
 }
 
 function cookieExtractor(req: any): null | string {
-    return (req && req.cookies) ? (req.cookies?.jwt ?? null) : null;
+  return req && req.cookies ? req.cookies?.jwt ?? null : null;
 }
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor() {
-        super({
-            jwtFromRequest: cookieExtractor,
-            secretOrKey: process.env.JWT_KEY,
-        });
+  constructor(private authService: AuthService) {
+    super({
+      jwtFromRequest: cookieExtractor,
+      ignoreExpiration: false,
+      secretOrKey: process.env.JWT_KEY,
+    });
+  }
+
+  async validate(payload: JwtPayload): Promise<User> {
+    console.log(payload);
+    if (!payload || !payload.id) {
+      throw new UnauthorizedException('Invalid token or does not exists');
     }
 
-    async validate(payload: JwtPayload, done: (error, user) => void) {
-        if (!payload || !payload.id) {
-            return done(new UnauthorizedException(), false);
-        }
-
-        const user = await User.findOne({
-            where: {registerToken: payload.id}
-        });
-        if (!user) {
-            return done(new UnauthorizedException(), false);
-        }
-
-        done(null, user);
+    const user = this.authService.findUserByPayload(payload);
+    if (!user) {
+      throw new UnauthorizedException('Token does not belongs to any user');
     }
+
+    return user;
+  }
 }

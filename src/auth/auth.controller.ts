@@ -2,38 +2,74 @@ import {
   Controller,
   Get,
   Post,
-  Body, Res, UseGuards,
+  Body,
+  Res,
+  UseGuards,
+  Param,
 } from '@nestjs/common';
-import {Response} from 'express';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
-import {AuthGuard} from "@nestjs/passport";
-import {UserObj} from "../decorators/userobj.decorator";
-import {User} from "../users/entities/user.entity";
-import {AuthRemindPwdDto} from "./dto/auth-remind-pwd.dto";
+import { AuthGuard } from '@nestjs/passport';
+import { UserObj } from '../decorators/userobj.decorator';
+import { User } from '../users/entities/user.entity';
+import { LoginDto } from './dto/login.dto';
+import {
+  LoginUserResponse,
+  LogoutUserResponse,
+  RegisterUserResponse,
+} from '../types';
+import { RegisterDto } from './dto/register.dto';
 
-@Controller('auth')
+@Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('/login')
-  async login(
-      @Body() req: User,
-      @Res() res: Response,
-  ): Promise<any> {
-    return this.authService.login(req, res);
+  @Post('/register/:userId')
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Param('userId') userId: string,
+    @Res() res: Response,
+  ) {
+    const tokenData = await this.authService.register(registerDto, userId);
+    res
+      .cookie('jwt', tokenData.accessToken, {
+        secure: false,
+        domain: 'localhost',
+        httpOnly: true,
+      })
+      .status(201)
+      .json({ success: true } as RegisterUserResponse);
   }
 
-  @Post('/remind-password')
-  async remindPassword(
-      @Body() req: AuthRemindPwdDto,
-  ): Promise<any> {
-    return this.authService.remindPassword(req);
+  @Post('/login')
+  async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<void> {
+    const tokenData = await this.authService.login(loginDto);
+    res
+      .cookie('jwt', tokenData.accessToken, {
+        secure: false,
+        domain: 'localhost',
+        httpOnly: true,
+      })
+      .status(200)
+      .json({ success: true } as LoginUserResponse);
   }
 
   @Get('/logout')
   @UseGuards(AuthGuard('jwt'))
   async logout(@UserObj() user: User, @Res() res: Response) {
-    return this.authService.logout(user, res);
+    res.clearCookie('jwt', {
+      secure: false,
+      domain: 'localhost',
+      httpOnly: true,
+    });
+    return res.json({ success: true } as LogoutUserResponse);
   }
 
+  //
+  // @Post('/remind-password')
+  // async remindPassword(
+  //     @Body() req: AuthRemindPwdDto,
+  // ): Promise<string> {
+  //   return this.authService.remindPassword(req);
+  // }
 }

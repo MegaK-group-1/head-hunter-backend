@@ -1,3 +1,3 @@
 export class AuthRemindPwdDto {
-    email: string;
+  email: string;
 }

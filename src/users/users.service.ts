@@ -5,23 +5,24 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { hashPwd } from 'utils/hash-pwd';
-import {
-  CreateUserDto,
-  CreateUserHrDto,
-  CreateUserAdminDto,
-} from './dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { ImportUsersResponse, userRole } from 'src/types/users/user';
+import {
+  ImportUsersResponse,
+  UserRole,
+  UserStatus,
+} from 'src/types/users/user';
 import { FileImport, ImportError } from '../types';
 import { parse, ParseResult } from 'papaparse';
 import { readFile, unlink } from 'fs/promises';
 import { storagePath } from '../config/storage/storage.config';
 import { ImportUserDto } from './dto/import-user.dto';
-
 import { UserDetails } from './entities/user.details.entity';
-import { validate, ValidationError } from 'class-validator';
+import { JwtPayload } from '../auth/jwt.strategy';
+import { PasswordService } from '../auth/password/password.service';
+import { RegisterDto } from '../auth/dto/register.dto';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class UsersService {
@@ -29,55 +30,55 @@ export class UsersService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(UserDetails)
     private userDetailsRepository: Repository<UserDetails>,
+    private passwordService: PasswordService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const user = new User();
     Object.assign(user, createUserDto);
-    user.password = hashPwd(createUserDto.password);
-    user.role = userRole.STUDENT;
+    user.password = this.passwordService.hashPassword(createUserDto.password);
+    user.role = UserRole.STUDENT;
     //TODO: tu ma sie znalezc email service ktory wysyla emeila z active token
     return await this.userRepository.save(user);
   }
 
-  async createUserHr(createUserDto: CreateUserHrDto): Promise<User> {
-    const user = new User();
-    Object.assign(user, createUserDto);
-    user.password = hashPwd(createUserDto.password);
-    user.role = userRole.HR;
-    //TODO: tu ma sie znalezc email service ktory wysyla emeila z active token
-    return await this.userRepository.save(user);
-  }
-
-  async createUserAdmin(createUserDto: CreateUserAdminDto): Promise<User> {
-    const user = new User();
-    Object.assign(user, createUserDto);
-    user.password = hashPwd(createUserDto.password);
-    user.role = userRole.ADMIN;
-    //TODO: tu ma sie znalezc email service ktory wysyla emeila z active token
-    return await this.userRepository.save(user);
-  }
-
-  async findAll() {
-    return await User.find({ where: { role: userRole.STUDENT } });
-  }
-
-  async findOne(id: string): Promise<User> {
-    const user = await User.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException('user  not found');
+  async register(registerDto: RegisterDto, user: User): Promise<void> {
+    user.firstName = registerDto.firstName;
+    user.lastName = registerDto.lastName;
+    user.password = this.passwordService.hashPassword(registerDto.password);
+    user.status = UserStatus.ACTIVE;
+    if (user.role === UserRole.STUDENT) {
+      user.userDetails.phone = registerDto.phone ?? null;
+      user.userDetails.githubUsername = registerDto.githubUserName ?? null; //TODO github check
+      await this.userDetailsRepository.save(user.userDetails);
     }
-    return user;
+
+    await this.userRepository.save(user);
+  }
+
+  async findOneByPayload(payload: JwtPayload): Promise<User | null> {
+    const user = await User.findOne({ where: { id: payload.id } });
+    return user ?? null;
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    return user ?? null;
+  }
+
+  async findOneById(id: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    return user ?? null;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  async remove(id: string): Promise<User> {
-    const user = await this.findOne(id);
-    return await user.remove();
-  }
+  // async remove(id: string): Promise<User> {
+  //   const user = await this.findOne(id);
+  //   return await user.remove();
+  // }
 
   async importFromCsv(file: FileImport): Promise<ImportUsersResponse> {
     try {
@@ -100,9 +101,11 @@ export class UsersService {
           teamProjectDegree,
           courseCompletion,
           courseEngagment,
+          role,
         } of parseResult.data) {
           const userDto = new ImportUserDto();
           userDto.email = email;
+          userDto.role = role;
           userDto.projectDegree = projectDegree;
           userDto.bonusProjectUrls = bonusProjectUrls;
           userDto.teamProjectDegree = teamProjectDegree;
@@ -140,8 +143,9 @@ export class UsersService {
 
           const user = new User();
           user.email = email;
+          user.role = role;
 
-          const userDetails = UserDetails.create({ email, ...userDto });
+          const userDetails = UserDetails.create({ email, role, ...userDto });
 
           await this.userDetailsRepository.save(userDetails);
 

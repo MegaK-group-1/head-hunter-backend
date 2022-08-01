@@ -1,95 +1,101 @@
-import {Inject, Injectable} from '@nestjs/common';
-import {Response} from 'express';
-import {User} from "../users/entities/user.entity";
-import {hashPwd} from "../../utils/hash-pwd";
-import {v4 as uuid} from 'uuid';
-import {sign} from 'jsonwebtoken';
-import {JwtPayload} from "./jwt.strategy";
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
-import {AuthRemindPwdDto} from "./dto/auth-remind-pwd.dto";
-import {MailService} from "../mail/mail.service";
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { User } from '../users/entities/user.entity';
+import { JwtPayload } from './jwt.strategy';
+import { UsersService } from '../users/users.service';
+import { PasswordService } from './password/password.service';
+import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
+import { RegisterDto } from './dto/register.dto';
+import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        @InjectRepository(User) private userRepository: Repository<User>,
-        @Inject(MailService) private mailService: MailService
-    ) {}
-    private createToken(currentTokenId: string): { accessToken: string, expiresIn: number } {
-        const payload: JwtPayload = {id: currentTokenId};
-        const expiresIn = 60 * 60 * 24;
-        const accessToken = sign(payload, process.env.JWT_KEY, {expiresIn});
-        return {
-            accessToken,
-            expiresIn,
-        };
-    };
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+    private passwordService: PasswordService,
+  ) {}
 
-    private async generateToken(user: User): Promise<string> {
-        let token;
-        let userWithThisToken = null;
-        do {
-            token = uuid();
-            userWithThisToken = await User.findOne({where: {registerToken: token}});
-        } while (!!userWithThisToken);
-        user.registerToken = token;
-        await user.save();
-
-        return token;
-    };
-
-    async login(req: User, res: Response): Promise<any> {
-        try {
-            const user = await User.findOne({
-                where: {
-                    email: req.email,
-                    password: hashPwd(req.password),
-                }
-            });
-
-            if (!user) {
-                return res.json({error: 'Invalid login data!'});
-            }
-            const token =  this.createToken(await this.generateToken(user));
-
-            return res
-                .cookie('jwt', token.accessToken, {
-                    secure: false,
-                    domain: 'localhost',
-                    httpOnly: true,
-                })
-                .json({ok: true});
-        } catch (e) {
-            return res.json({error: e.message});
-        }
-    };
-
-    async logout(user: User, res: Response) {
-        try {
-            user.registerToken = null;
-            await user.save();
-            res.clearCookie(
-                'jwt',
-                {
-                    secure: false,
-                    domain: 'localhost',
-                    httpOnly: true,
-                }
-            );
-            return res.json({ok: true});
-        } catch (e) {
-            return res.json({error: e.message});
-        }
+  async register(
+    registerDto: RegisterDto,
+    userId: string,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
+    const user = await this.usersService.findOneById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User Not Found');
     }
+    await this.usersService.register(registerDto, user);
+    return await this.login(
+      { email: user.email, password: registerDto.password },
+      user,
+    );
+  }
 
-    async remindPassword(req: AuthRemindPwdDto) {
-        const user = await this.userRepository.findOne( {where: {email: req.email}});
-        //@TODO add random password generator and send it via email
-        const newRandomPassword =  'hTY56$-5h';
-        user.password = hashPwd(newRandomPassword);
-        await this.userRepository.save(user);
-        await this.mailService.sendMail('lol@lol.pl', 'temat', `Twoje nowe hasło to: ${newRandomPassword}`);
+  async login(
+    loginDto: LoginDto,
+    initialLogin?: User,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
+    if (!initialLogin) {
+      const user = await this.checkUser(loginDto.email, loginDto.password);
+
+      if (!user) {
+        throw new UnauthorizedException('Password or Email is invalid');
+      }
+
+      const { expiresIn, accessToken } = await this.createToken(user.id);
+
+      return {
+        accessToken,
+        expiresIn,
+      };
+    } else {
+      const { expiresIn, accessToken } = await this.createToken(
+        initialLogin.id,
+      );
+
+      return {
+        accessToken,
+        expiresIn,
+      };
     }
+  }
 
+  async checkUser(email: string, password: string): Promise<User | null> {
+    const user = await this.usersService.findOneByEmail(email);
+
+    if (user && this.passwordService.comparePassword(password, user.password)) {
+      return user;
+    }
+    return null;
+  }
+
+  async findUserByPayload(payload: JwtPayload): Promise<User | null> {
+    return await this.usersService.findOneByPayload(payload);
+  }
+
+  private async createToken(
+    userId: string,
+  ): Promise<{ accessToken: string; expiresIn: number }> {
+    const payload: JwtPayload = { id: userId };
+    const expiresIn = 60 * 60 * 24; //1d
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_KEY,
+      expiresIn,
+    });
+    return {
+      accessToken,
+      expiresIn,
+    };
+  }
+
+  // async remindPassword(req: AuthRemindPwdDto) {
+  //   const user = await this.userRepository.findOne({
+  //     where: { email: req.email },
+  //   });
+  //   //@TODO add random password generator and send it via email
+  //   const newRandomPassword = 'hTY56$-5h';
+  //   user.password = hashPwd(newRandomPassword);
+  //   await this.userRepository.save(user);
+  //   return `Twoje nowe hasło to: ${newRandomPassword}`;
+  // }
 }

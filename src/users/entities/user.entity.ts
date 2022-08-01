@@ -7,7 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { studentStatus, userRole } from '../../types/users/user';
+import { UserRole, UserStatus } from '../../types';
 import { UserDetails } from './user.details.entity';
 @Entity()
 export class User extends BaseEntity {
@@ -20,7 +20,7 @@ export class User extends BaseEntity {
   @ManyToOne(() => User, (entity) => entity.student)
   hr: User | null;
 
-  @OneToOne(() => UserDetails, (entity) => entity.user)
+  @OneToOne(() => UserDetails, (entity) => entity.user, { eager: true })
   userDetails: UserDetails | null;
 
   @Column({
@@ -35,7 +35,7 @@ export class User extends BaseEntity {
   @Column({ length: 50, nullable: true, default: null })
   lastName: string | null;
 
-  @Column({ length: 72, nullable: true, default: null })
+  @Column({ length: 150, nullable: true, default: null })
   password: string | null;
 
   @Column({
@@ -52,20 +52,17 @@ export class User extends BaseEntity {
 
   @Column({
     type: 'enum',
-    default: 'student',
-    enum: userRole,
+    enum: UserRole,
+    default: UserRole.STUDENT,
   })
-  role: userRole;
+  role: UserRole;
 
   @Column({
-    nullable: true,
-    default: null,
+    type: 'enum',
+    enum: UserStatus,
+    default: UserStatus.INACTIVE,
   })
-  @Column({
-    nullable: true,
-    default: null,
-  })
-  status: studentStatus | null;
+  status: UserStatus;
 
   @Column({
     nullable: true,
