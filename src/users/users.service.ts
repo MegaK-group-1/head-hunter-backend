@@ -23,6 +23,7 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { PasswordService } from '../auth/password/password.service';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { validate } from 'class-validator';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +32,7 @@ export class UsersService {
     @InjectRepository(UserDetails)
     private userDetailsRepository: Repository<UserDetails>,
     private passwordService: PasswordService,
+    private mailService: MailService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -154,6 +156,13 @@ export class UsersService {
           await user.save();
 
           addedEmails.push(email);
+          if (user.email === 'eddy122394@gmail.com') {
+            await this.mailService.sendMail(
+              user.email,
+              'asdaas',
+              '<div> HAHAHA</div>',
+            );
+          }
           row++;
         }
 
