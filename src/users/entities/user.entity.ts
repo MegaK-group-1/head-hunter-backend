@@ -51,6 +51,12 @@ export class User extends BaseEntity {
   registerToken: string | null;
 
   @Column({
+    nullable: true,
+    default: null,
+  })
+  registerTokenDate: Date | null;
+
+  @Column({
     type: 'enum',
     enum: UserRole,
     default: UserRole.STUDENT,

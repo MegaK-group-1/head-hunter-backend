@@ -23,7 +23,9 @@ import { JwtPayload } from '../auth/jwt.strategy';
 import { PasswordService } from '../auth/password/password.service';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { validate } from 'class-validator';
+import { TokensService } from '../auth/tokens/tokens.service';
 import { MailService } from '../mail/mail.service';
+import { MailRegister } from '../types/mail/mail.register';
 
 @Injectable()
 export class UsersService {
@@ -32,6 +34,7 @@ export class UsersService {
     @InjectRepository(UserDetails)
     private userDetailsRepository: Repository<UserDetails>,
     private passwordService: PasswordService,
+    private tokenService: TokensService,
     private mailService: MailService,
   ) {}
 
@@ -82,7 +85,10 @@ export class UsersService {
   //   return await user.remove();
   // }
 
-  async importFromCsv(file: FileImport): Promise<ImportUsersResponse> {
+  async importFromCsv(
+    file: FileImport,
+    mailUrl: string,
+  ): Promise<ImportUsersResponse> {
     try {
       if (file) {
         const csvData = await readFile(
@@ -143,9 +149,14 @@ export class UsersService {
             continue;
           }
 
+          const { token, hashedToken, tokenDate } =
+            await this.tokenService.createToken();
+
           const user = new User();
           user.email = email;
           user.role = role;
+          user.registerToken = hashedToken;
+          user.registerTokenDate = tokenDate;
 
           const userDetails = UserDetails.create({ email, role, ...userDto });
 
@@ -156,13 +167,18 @@ export class UsersService {
           await user.save();
 
           addedEmails.push(email);
-          if (user.email === 'eddy122394@gmail.com') {
-            await this.mailService.sendMail(
-              user.email,
-              'asdaas',
-              '<div> HAHAHA</div>',
-            );
-          }
+
+          const registerData: MailRegister = {
+            email: user.email,
+            redirectUrl: `${mailUrl}/${user.id}/${token}`,
+          };
+          await this.mailService.sendMail<MailRegister>(
+            user.email,
+            'Registration Success',
+            'register',
+            registerData,
+          );
+
           row++;
         }
 

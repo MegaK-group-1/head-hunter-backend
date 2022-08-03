@@ -1,4 +1,5 @@
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { dirname } from 'path';
 
 export const mailConfig = {
   transport: {
@@ -11,7 +12,7 @@ export const mailConfig = {
     from: 'admin@test.example.com',
   },
   template: {
-    dir: __dirname + '/templates',
+    dir: dirname(dirname(__dirname)) + '/mail/templates',
     adapter: new HandlebarsAdapter(),
     options: {
       strict: true,

@@ -5,7 +5,6 @@ import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
 import { UserDetails } from './entities/user.details.entity';
 import { AuthModule } from '../auth/auth.module';
-import { MailService } from '../mail/mail.service';
 import { MailModule } from '../mail/mail.module';
 
 @Module({
