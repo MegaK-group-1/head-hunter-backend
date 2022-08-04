@@ -19,12 +19,15 @@ import {
   RegisterUserResponse,
 } from '../types';
 import { RegisterDto } from './dto/register.dto';
+import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('/register/:userId')
+  @ApiBody({ type: [RegisterDto] })
+  @ApiResponse({ status: 201, description: 'User has been registered' })
   async register(
     @Body() registerDto: RegisterDto,
     @Param('userId') userId: string,
@@ -42,6 +45,7 @@ export class AuthController {
   }
 
   @Post('/login')
+  @ApiBody({ type: LoginDto })
   async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<void> {
     const tokenData = await this.authService.login(loginDto);
     res
@@ -56,6 +60,7 @@ export class AuthController {
 
   @Get('/logout')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   async logout(@UserObj() user: User, @Res() res: Response) {
     res.clearCookie('jwt', {
       secure: false,
