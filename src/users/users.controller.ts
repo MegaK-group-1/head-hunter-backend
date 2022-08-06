@@ -8,8 +8,11 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Headers,
   NotFoundException,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UsersService } from './users.service';
 import {
   CreateUserDto,
@@ -48,7 +51,11 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('usersCsv', { dest: storagePath }))
   async importFromCsv(
     @UploadedFile() file: FileImport,
+    @Req() req: Request,
   ): Promise<ImportUsersResponse> {
-    return await this.usersService.importFromCsv(file);
+    return await this.usersService.importFromCsv(
+      file,
+      `${req.protocol}::/${req.get('host')}/users`,
+    );
   }
 }
