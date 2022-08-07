@@ -1,4 +1,5 @@
 import { ImportError } from './import';
+import { User } from "../../users/entities/user.entity";
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -30,4 +31,8 @@ export enum ExpectedContractType {
 export interface ImportUsersResponse {
   imported: string[];
   errors: ImportError[];
+}
+
+export interface GetUsersResponse {
+  users: User[];
 }

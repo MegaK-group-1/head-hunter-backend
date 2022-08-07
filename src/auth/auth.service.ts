@@ -6,7 +6,8 @@ import { PasswordService } from './password/password.service';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
-import { use } from 'passport';
+import { TokensService } from './tokens/tokens.service';
+import { VerifyUserResponse } from '../types';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,34 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private passwordService: PasswordService,
+    private tokenService: TokensService,
   ) {}
+
+  async verify(
+    userId: string,
+    registerToken: string,
+  ): Promise<VerifyUserResponse> {
+    const { hashedToken } = await this.tokenService.createToken(registerToken);
+
+    const user = await this.usersService.findOneById(userId);
+
+    if (
+      !user ||
+      user.registerToken !== hashedToken ||
+      user.registerTokenDate < new Date()
+    ) {
+      if (user) {
+        await this.usersService.remove(userId);
+      }
+      throw new UnauthorizedException(
+        'The registration link has expired or was corrupted import this user again',
+      );
+    }
+
+    await this.usersService.activate(user);
+
+    return { success: true };
+  }
 
   async register(
     registerDto: RegisterDto,

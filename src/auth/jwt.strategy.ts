@@ -23,7 +23,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<User> {
-    console.log(payload);
     if (!payload || !payload.id) {
       throw new UnauthorizedException('Invalid token or does not exists');
     }

@@ -15,7 +15,7 @@ export class TokensService {
     }
     const hashedToken = createHash('sha256').update(token).digest('hex');
 
-    const tokenDate = new Date(Date.now() + 1920 * 60 * 1000);
+    const tokenDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
     return { token, hashedToken, tokenDate };
   }
 }
