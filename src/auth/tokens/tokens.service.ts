@@ -4,17 +4,18 @@ import { randomBytes, createHash } from 'crypto';
 
 @Injectable()
 export class TokensService {
-  async createToken(): Promise<{
+  async createToken(token?: string): Promise<{
     token: string;
     hashedToken: string;
     tokenDate: Date;
   }> {
-    const randomBytesAsync = promisify(randomBytes);
-    const token = (await randomBytesAsync(32)).toString('hex');
-
+    if (!token) {
+      const randomBytesAsync = promisify(randomBytes);
+      token = (await randomBytesAsync(32)).toString('hex');
+    }
     const hashedToken = createHash('sha256').update(token).digest('hex');
 
-    const tokenDate = new Date(Date.now() + 240 * 60 * 1000);
+    const tokenDate = new Date(Date.now() + 1920 * 60 * 1000);
     return { token, hashedToken, tokenDate };
   }
 }

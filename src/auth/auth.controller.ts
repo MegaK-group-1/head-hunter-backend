@@ -6,6 +6,7 @@ import {
   Res,
   UseGuards,
   Param,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -20,10 +21,39 @@ import {
 } from '../types';
 import { RegisterDto } from './dto/register.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
+import { TokensService } from './tokens/tokens.service';
+import { UsersService } from '../users/users.service';
 
 @Controller('/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+    private readonly tokenService: TokensService,
+  ) {}
+
+  @Get('/verify/:userId/:registerToken')
+  async verify(
+    @Param('userId') userId: string,
+    @Param('registerToken') registerToken: string,
+  ) {
+    const { hashedToken } = await this.tokenService.createToken(registerToken);
+
+    const user = await this.usersService.findOneById(userId);
+
+    if (
+      !user ||
+      user.registerToken !== hashedToken ||
+      user.registerTokenDate > new Date()
+    ) {
+      if (user) {
+        await this.usersService.remove(userId);
+      }
+      throw new UnauthorizedException(
+        'The registration link has expired or was corrupted',
+      );
+    }
+  }
 
   @Post('/register/:userId')
   @ApiBody({ type: [RegisterDto] })

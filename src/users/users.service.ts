@@ -80,10 +80,9 @@ export class UsersService {
     return `This action updates a #${id} user`;
   }
 
-  // async remove(id: string): Promise<User> {
-  //   const user = await this.findOne(id);
-  //   return await user.remove();
-  // }
+  async remove(id: string): Promise<void> {
+    await this.userRepository.delete({ id });
+  }
 
   async importFromCsv(
     file: FileImport,
