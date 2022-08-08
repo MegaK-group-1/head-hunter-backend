@@ -9,10 +9,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import {
+  GetUsersResponse,
   ImportUsersResponse,
   UserRole,
-  UserStatus,
-} from 'src/types/users/user';
+  UserStatus
+} from "src/types/users/user";
 import { FileImport, ImportError } from '../types';
 import { parse, ParseResult } from 'papaparse';
 import { readFile, unlink } from 'fs/promises';
@@ -61,6 +62,13 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
+  async activate(user: User): Promise<void> {
+    user.registerToken = null;
+    user.registerTokenDate = null;
+    user.status = UserStatus.ACTIVE;
+    await this.userRepository.save(user);
+  }
+
   async findOneByPayload(payload: JwtPayload): Promise<User | null> {
     const user = await User.findOne({ where: { id: payload.id } });
     return user ?? null;
@@ -80,10 +88,9 @@ export class UsersService {
     return `This action updates a #${id} user`;
   }
 
-  // async remove(id: string): Promise<User> {
-  //   const user = await this.findOne(id);
-  //   return await user.remove();
-  // }
+  async remove(id: string): Promise<void> {
+    await this.userRepository.delete({ id });
+  }
 
   async importFromCsv(
     file: FileImport,
@@ -168,6 +175,10 @@ export class UsersService {
 
           addedEmails.push(email);
 
+          if (user.email === 'eddy122394@gmail.com') {
+            console.log(token);
+          }
+
           const registerData: MailRegister = {
             email: user.email,
             redirectUrl: `${mailUrl}/${user.id}/${token}`,
@@ -199,6 +210,10 @@ export class UsersService {
       await unlink(`${storagePath}/${file.filename}`);
       throw e;
     }
+  }
+
+  async getUsers(): Promise<GetUsersResponse> {
+    return { users: await this.userRepository.find() };
   }
 
   private async parseCsv(csvData: string): Promise<ParseResult<ImportUserDto>> {

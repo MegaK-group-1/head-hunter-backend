@@ -5,34 +5,25 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseInterceptors,
   UploadedFile,
-  Headers,
-  NotFoundException,
   Req,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { UsersService } from './users.service';
-import {
-  CreateUserDto,
-  CreateUserHrDto,
-  CreateUserAdminDto,
-} from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserObj } from 'src/decorators/userobj.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FileImport, ImportUsersResponse } from '../types';
+import { FileImport, GetUsersResponse, ImportUsersResponse } from '../types';
 import { storagePath } from '../config/storage/storage.config';
 
 @Controller('/users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Post()
-  // create(@Body() createUserDto: CreateUserDto) {
-  //   return this.usersService.create(createUserDto);
-  //
+  @Get('/')
+  async getUsers(): Promise<GetUsersResponse> {
+    return await this.usersService.getUsers();
+  }
 
   // TODO: wstęp tylko dla zalogowanego, rework
   @Get('/me')

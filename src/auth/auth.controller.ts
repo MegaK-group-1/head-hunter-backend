@@ -17,6 +17,7 @@ import {
   LoginUserResponse,
   LogoutUserResponse,
   RegisterUserResponse,
+  VerifyUserResponse,
 } from '../types';
 import { RegisterDto } from './dto/register.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -24,6 +25,14 @@ import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('/verify/:userId/:registerToken')
+  async verify(
+    @Param('userId') userId: string,
+    @Param('registerToken') registerToken: string,
+  ): Promise<VerifyUserResponse> {
+    return this.authService.verify(userId, registerToken);
+  }
 
   @Post('/register/:userId')
   @ApiBody({ type: [RegisterDto] })
